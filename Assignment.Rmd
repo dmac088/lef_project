@@ -1,0 +1,54 @@
+---
+title: "Coursera Leaflet Assignment - Week 2"
+output: html_document
+date: "2023-04-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+**This is a funky little interactive map of China written in Leaflet, it does the following:**
+
+-   Merges geo map information and provincial demographic data (population)
+
+-   Adds a legend to color code the provinces by the population density
+
+-   Shows the name and population of the various provinces in China when you mouse hover (labels)
+
+-   Allows you to view the Wikipedia page of the province when you click on it (popups)
+
+```{r, echo=FALSE, message=FALSE,warning=FALSE,error=FALSE}
+library(jsonlite)
+library(leaflet)
+library(dplyr)
+library(rgdal)
+require(plyr)
+
+topoData <- rgdal::readOGR("https://raw.githubusercontent.com/deldersveld/topojson/master/countries/china/china-provinces.json", verbose=FALSE)
+
+#get the population of the provinces
+cn_prov <- read.csv('~/cnpop.csv')
+cn_prov$popnum <- as.numeric(gsub(",", "", cn_prov$Population))
+
+#create a vector for lookup
+getProvincePopulation <- cn_prov$popnum
+names(getProvincePopulation) <- cn_prov$Province
+
+#create the map
+topoData@data$POP <- getProvincePopulation[topoData$NAME_1]
+topoData@data$label <- paste(topoData@data$NAME_1, ' - ', topoData@data$POP / 1000000, 'M')
+topoData@data$link <- paste('<a href="https://en.wikipedia.org/wiki/', topoData@data$NAME_1,'">link</a>')
+
+pal <- colorNumeric("viridis", NULL)
+
+leaflet(topoData) %>%
+  addTiles() %>%
+  addPolygons(stroke=FALSE,
+              smoothFactor = 0.3,
+              fillOpacity = 1,
+              fillColor = ~pal(POP),
+              label = ~label,
+              popup = ~link) %>%
+  addLegend(pal = pal, values = ~POP, opacity = 1.0, title = "China Population")
+```
