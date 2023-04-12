@@ -38,7 +38,7 @@ names(getProvincePopulation) <- cn_prov$Province
 #create the map
 topoData@data$POP <- getProvincePopulation[topoData$NAME_1]
 topoData@data$label <- paste(topoData@data$NAME_1, ' - ', topoData@data$POP / 1000000, 'M')
-topoData@data$link <- paste('<a href="https://en.wikipedia.org/wiki/', topoData@data$NAME_1,'">link</a>')
+topoData@data$link <- paste('<a target="_blank" href="https://en.wikipedia.org/wiki/', topoData@data$NAME_1,'">link</a>')
 
 pal <- colorNumeric("viridis", NULL)
 
